@@ -704,7 +704,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 - **📖 Documentation**: Check [DEPLOYMENT.md](DEPLOYMENT.md) for detailed setup
 - **🐛 Issues**: Open an issue on GitHub
 - **💬 Discussions**: Use GitHub Discussions for questions
-- **📧 Contact**: MLOps Team at mlops@yourcompany.com
+- **📧 Contact**: nguierochjunior@gmail.com
 
 ---
 
