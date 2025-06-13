@@ -330,8 +330,8 @@ jobs:
 
 Once deployed, access the interactive API documentation:
 
-- **Swagger UI**: `http://your-domain/docs`
-- **ReDoc**: `http://your-domain/redoc`
+- **Swagger UI**: ``
+- **ReDoc**: ``
 
 ## 🆘 Support
 
