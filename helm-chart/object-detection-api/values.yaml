@@ -1,0 +1,205 @@
+# Default values for object-detection-api
+replicaCount: 2
+
+image:
+  repository: your-registry/object-detection-api
+  pullPolicy: IfNotPresent
+  tag: "1.0.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Container Security Context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: object-detection-api.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: object-detection-api-tls
+  #    hosts:
+  #      - object-detection-api.local
+
+# Resource Limits and Requests
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+    nvidia.com/gpu: 1
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+    nvidia.com/gpu: 1
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Node Selection
+nodeSelector:
+  accelerator: nvidia-tesla-v100  # GPU node selector
+
+tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - object-detection-api
+        topologyKey: kubernetes.io/hostname
+
+# Environment Variables
+env:
+  - name: WORKERS
+    value: "1"
+  - name: LOG_LEVEL
+    value: "info"
+  - name: MODEL_V1_PATH
+    value: "/app/models/yolov9_v1.onnx"
+  - name: MODEL_V2_PATH
+    value: "/app/models/yolov9_v2.onnx"
+  - name: S3_BUCKET_NAME
+    value: "ml-active-learning"
+  - name: UNCERTAINTY_THRESHOLD
+    value: "0.7"
+  - name: REFERENCE_DATA_PATH
+    value: "/app/data/reference_features.json"
+
+# AWS Credentials (use AWS IAM roles in production)
+awsCredentials:
+  accessKeyId: ""
+  secretAccessKey: ""
+  region: "us-west-2"
+
+# Persistent Volume Claims
+persistence:
+  models:
+    enabled: true
+    storageClass: "fast-ssd"
+    size: 10Gi
+    accessMode: ReadWriteOnce
+  data:
+    enabled: true
+    storageClass: "standard"
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
+# Health Checks
+healthCheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# Monitoring
+monitoring:
+  serviceMonitor:
+    enabled: true
+    namespace: monitoring
+    interval: 30s
+    path: /metrics
+    labels:
+      release: prometheus
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Network Policy
+networkPolicy:
+  enabled: false
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: ingress-nginx
+      ports:
+      - protocol: TCP
+        port: 8000
+
+# Init Containers for model download
+initContainers:
+  modelDownloader:
+    enabled: false
+    image: amazon/aws-cli:latest
+    command:
+      - /bin/sh
+      - -c
+      - |
+        aws s3 cp s3://your-model-bucket/yolov9_v1.onnx /models/yolov9_v1.onnx
+        aws s3 cp s3://your-model-bucket/yolov9_v2.onnx /models/yolov9_v2.onnx
+
+# ConfigMap for additional configuration
+configMap:
+  enabled: false
+  data: {}
+
+# Secret for sensitive data
+secret:
+  enabled: false
+  data: {} 

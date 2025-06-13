@@ -1,0 +1,21 @@
+apiVersion: v2
+name: object-detection-api
+description: Production-ready YOLOv9 Object Detection API with MLOps features
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ml
+  - ai
+  - object-detection
+  - yolo
+  - mlops
+  - fastapi
+home: https://github.com/your-org/real-time-vision-api
+sources:
+  - https://github.com/your-org/real-time-vision-api
+maintainers:
+  - name: MLOps Team
+    email: mlops@yourcompany.com
+annotations:
+  category: Machine Learning 
