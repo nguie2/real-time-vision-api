@@ -712,6 +712,6 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 
 **⭐ Star this repo if it helped you!**
 
-Made with ❤️ by the MLOps Team
+Made with ❤️ by Nguie Angoue jean roch junior "nguierochjunior@gmail.com"
 
 </div>
